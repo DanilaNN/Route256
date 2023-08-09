@@ -1,0 +1,17 @@
+grpcPort: 50052
+httpPort: 8081
+# pgConnStr: "postgres://user:password@localhost:5434/loms?sslmode=disable"
+pgConnStr: "postgres://user:password@loms_db:5432/loms?sslmode=disable"
+consumerGroup: route-example
+kafkaTopic: orders
+environment: PRODUCTION
+jaegerHost: "jaeger:6832"
+# metricsHost: "127.0.0.1:8002"
+metricsHost: "loms:8002"
+kafkaBrokers:
+  # - "127.0.0.1:9091"
+  # - "127.0.0.1:9092"
+  # - "127.0.0.1:9093"
+  - "kafka1:29091"
+  - "kafka2:29092"
+  - "kafka3:29093"

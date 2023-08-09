@@ -1,0 +1,8 @@
+token: 5ALc0aS1rtHIidf2lg408e1W
+pgConnStr: postgres://user:password@checkout_db:5432/checkout?sslmode=disable
+port: 8080
+portGrpc: 50051
+environment: PRODUCTION
+metricsHost: "checkout:8002"
+jaegerHost: "jaeger:6831"
+services: {loms: http://loms:8081, productService: http://route256.pavl.uk:8080/, lomsGrpc: loms:50052, productServiceGrpc: route256.pavl.uk:8082}

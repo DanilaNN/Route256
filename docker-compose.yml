@@ -1,0 +1,117 @@
+version: "3.1"
+services:
+  # checkout db
+  checkout_db:
+    image: postgres:15.1
+    environment:
+      POSTGRES_DB: checkout
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    container_name: 'checkout-postgres-container'
+    volumes:
+      - .:/var/lib/postgresql/data/checkout
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d checkout"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+
+  # loms db
+  loms_db:
+    image: postgres:15.1
+    environment:
+      POSTGRES_DB: loms
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    container_name: 'loms-postgres-containelr'
+    volumes:
+      - .:/var/lib/postgresql/data/loms
+    ports:
+      - 5434:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d loms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+
+  # # test db
+  # test_db:
+  #   image: postgres:15.1
+  #   environment:
+  #     POSTGRES_DB: test
+  #     POSTGRES_USER: user
+  #     POSTGRES_PASSWORD: password
+  #     PGDATA: "/var/lib/postgresql/data/pgdata"
+  #   container_name: 'test-postgres-container'
+  #   volumes:
+  #     - .:/var/lib/postgresql/data/test
+  #   ports:
+  #     - 5435:5432
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U user -d loms"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 10s
+  #   restart: unless-stopped
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 4G
+
+  # checkout
+  checkout:
+    image: checkout
+    build: ./checkout/
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+      - "6060:6060"
+    depends_on:
+      - checkout_db
+
+  # loms
+  loms:
+    image: loms
+    build: ./loms/
+    ports:
+      - "8081:8081"
+      - "50052:50052"
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - loms_db
+      - zookeeper
+
+  notifications:
+    image: notifications
+    build: ./notifications
+    ports:
+      - "8082:8082"
+      - "8085:8085" # user order history
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - zookeeper
+      - loms

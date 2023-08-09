@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  filed:
+    command: /file.d/file.d --config /config.yaml
+    image: ozonru/file.d:latest-linux-amd64
+    volumes:
+      - ./infra/logger/data/offsets.yaml:/tmp/offsets.yaml
+      - ./infra/logger/filed.yaml:/config.yaml
+      - ./infra/logger/data/log_loms.txt:/tmp/logs/log_loms.txt
+      - ./infra/logger/data/log_checkout.txt:/tmp/logs/log_checkout.txt
+      - ./infra/logger/data/log_notify.txt:/tmp/logs/log_notify.txt
+    links:
+      - graylog
+    depends_on:
+      - graylog
+  mongodb:
+    image: mongo:5.0
+    volumes:
+      - ./infra/logger/data/mongo:/data/db
+  elasticsearch:
+    image: elasticsearch:7.17.6
+    volumes:
+      - ./infra/logger/data/elastic:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  graylog:
+    image: graylog/graylog:5.1.1
+    volumes:
+      - ./infra/logger/graylog.conf:/usr/share/graylog/data/config/graylog.conf
+    environment:
+      - "GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}"
+      # Password: admin
+      - "GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}"
+      - "GRAYLOG_HTTP_BIND_ADDRESS=${GRAYLOG_HTTP_BIND_ADDRESS}"
+      - "GRAYLOG_HTTP_EXTERNAL_URI=${GRAYLOG_HTTP_EXTERNAL_URI}"
+    links:
+      - mongodb:mongo
+      - elasticsearch
+    depends_on:
+      - mongodb
+      - elasticsearch
+    ports:
+      # Graylog web interface and REST API
+      - "${GRAYLOG_WEB_PORT}:7555"

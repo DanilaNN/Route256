@@ -1,0 +1,16 @@
+telegramToken: 6316224495:AAHcYcH6hsBSrUZ2pgw5q_TkBEp3jJoZrzk
+telegramChatId: 366336736
+consumerGroup: route-example
+kafkaTopic: orders
+environment: PRODUCTION
+jaegerHost: "jaeger:6832"
+metricsHost: "notifications:8002"
+cacheCapacity: 5
+httpPort: ":8085"
+kafkaBrokers:
+  - "kafka1:29091"
+  - "kafka2:29092"
+  - "kafka3:29093"
+  # - "127.0.0.1:9091"
+  # - "127.0.0.1:9092"
+  # - "127.0.0.1:9093"

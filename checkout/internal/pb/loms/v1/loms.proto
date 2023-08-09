@@ -1,0 +1,93 @@
+syntax = 'proto3';
+
+package notes;
+
+option go_package = "route256/loms/pkg/loms_v1";
+
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+
+service loms {
+
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
+    option (google.api.http) = {
+      post: "/v1/createOrder"
+      body: "*"
+    };
+  }
+
+  rpc ListOrder(ListOrderRequest) returns (ListOrderResponse) {
+    option (google.api.http) = {
+      post: "/v1/listOrder"
+      body: "*"
+    };
+  }
+
+  rpc OrderPayed(OrderPayedRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/orderPayed"
+      body: "*"
+    };
+  }
+
+  rpc CancelOrder(CancelOrderRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/cancelOrder"
+      body: "*"
+    };
+  }
+
+  rpc Stocks(StocksRequest) returns (StocksResponse) {
+    option (google.api.http) = {
+      post: "/v1/stocks"
+      body: "*"
+    };
+  }
+}
+
+message CreateOrderRequest {
+  int64 user = 1 [(validate.rules).int64.gte = 0];
+  repeated orderItem items = 2;
+}
+
+message CreateOrderResponse {
+  int64 order_id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message ListOrderRequest {
+  int64 order_id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message ListOrderResponse {
+  string status = 1 [(validate.rules).string = {min_len: 2, max_len: 15}];
+  int64 user = 2 [(validate.rules).int64.gte = 0];
+  repeated orderItem items = 3;
+}
+
+message OrderPayedRequest {
+  int64 order_id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message CancelOrderRequest {
+  int64 order_id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message StocksRequest {
+  uint32 sku = 1 [(validate.rules).uint32.gte = 0];
+}
+
+message StocksResponse {
+  repeated Stock stocks = 1 [(validate.rules).repeated = {min_items: 1, max_items: 100}];
+}
+
+message orderItem {
+  uint32 sku = 1 [(validate.rules).uint32.gte = 0];
+  uint32 count = 2 [(validate.rules).uint32 = {gte:0, lt: 65536}];
+}
+
+message Stock {
+  int64 warehouse_id = 1 [(validate.rules).int64.gte = 0];
+  uint64 count = 2 [(validate.rules).uint64 = {gte:0, lt: 65536}];
+}

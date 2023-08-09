@@ -1,0 +1,1 @@
+Partition:  0  Offset:  42  AnswerID: 34
